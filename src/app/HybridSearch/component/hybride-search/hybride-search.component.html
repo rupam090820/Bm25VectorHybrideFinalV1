@@ -1,0 +1,177 @@
+<div class="container">
+  <header>
+    <h1>🔍 Hybrid Search (BM25 + Vector)</h1>
+    <p class="subtitle">Balance keyword matching with semantic understanding</p>
+  </header>
+
+  <!-- Loading Screen -->
+  @if (hybrideSearchService.isInitializing()) {
+    <div class="loading-screen">
+      <div class="loader"></div>
+      <h2>Initializing Hybrid Search...</h2>
+      <p>{{ hybrideSearchService.initProgress() }}%</p>
+      <div class="progress-bar">
+        <div
+          class="progress-fill"
+          [style.width.%]="hybrideSearchService.initProgress()"
+        ></div>
+      </div>
+      <p class="loading-info">
+        @if (hybrideSearchService.initProgress() < 20) {
+          Creating BM25 database...
+        } @else if (hybrideSearchService.initProgress() < 40) {
+          Loading transformer model...
+        } @else if (hybrideSearchService.initProgress() < 85) {
+          Generating embeddings ({{
+            hybrideSearchService.initProgress() - 40
+          }}/45)...
+        } @else {
+          Creating vector database...
+        }
+      </p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (hybrideSearchService.error()) {
+    <div class="error-banner">❌ {{ hybrideSearchService.error() }}</div>
+  }
+
+  <!-- Search Interface -->
+  @if (hybrideSearchService.isReady()) {
+    <div class="search-section">
+      <!-- Limit Control -->
+      <div class="control-group">
+        <label>Results Limit: {{ limit() }}</label>
+        <input
+          type="range"
+          min="5"
+          max="50"
+          step="5"
+          [value]="limit()"
+          (input)="onLimitChange($event)"
+          class="slider"
+        />
+      </div>
+
+      <!-- Search Input -->
+      <div class="search-input-container">
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search products with hybrid approach..."
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearchChange()"
+        />
+        @if (searchQuery()) {
+          <button class="clear-btn" (click)="clearSearch()">✕</button>
+        }
+      </div>
+
+      <!-- Hybrid Weight Slider -->
+      <div class="weight-control">
+        <label>Search Mode Balance</label>
+
+        <div class="weight-display">
+          BM25: {{ bm25Percentage() }}% | Vector: {{ vectorPercentage() }}%
+        </div>
+
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.1"
+          [value]="hybridWeight()"
+          (input)="onWeightChange($event)"
+          class="slider"
+        />
+
+        <div class="slider-labels">
+          <span>← Full BM25</span>
+          <span>Balanced</span>
+          <span>Full Vector →</span>
+        </div>
+      </div>
+
+      <!-- Search Results -->
+      @if (results()) {
+        <div class="results-section">
+          <div class="results-header">
+            <h3>
+              Found {{ results()!.count }} results
+              <span class="elapsed"
+                >({{ results()!.elapsed.toFixed(1) }}ms)</span
+              >
+              @if (hybrideSearchService.vectorStatus() === "loading") {
+                <span class="merging-badge">⏳ merging vector results...</span>
+              }
+            </h3>
+          </div>
+
+          <div class="results-grid">
+            @for (hit of results()!.hits; track hit.document.id) {
+              <div class="result-card">
+                <div class="card-header">
+                  <h4>{{ hit.document.name }}</h4>
+                  <span class="score">{{ (hit.score * 100).toFixed(1) }}%</span>
+                  @if (hit.rrfScore) {
+                    <span class="rrf-score"
+                      >RRF: {{ hit.rrfScore.toFixed(4) }}</span
+                    >
+                  }
+                </div>
+                <p class="description">{{ hit.document.description }}</p>
+                <div class="card-footer">
+                  <span class="price">\${{ hit.document.price }}</span>
+                  <!-- <span class="rating">⭐ {{ hit.document.meta.rating }}</span> -->
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Empty State -->
+      @if (searchQuery() && results()?.hits?.length === 0) {
+        <div class="empty-state">
+          <p>
+            No results found. Try adjusting the search balance or use different
+            keywords.
+          </p>
+        </div>
+      }
+
+      <!-- Initial State -->
+      @if (!searchQuery()) {
+        <div class="initial-state">
+          <h3>💡 Try searching for:</h3>
+          <div class="suggestions">
+            @for (suggestion of suggestions; track suggestion) {
+              <button
+                class="suggestion-chip"
+                (click)="selectSuggestion(suggestion)"
+              >
+                {{ suggestion }}
+              </button>
+            }
+          </div>
+
+          <div class="info-box">
+            <h4>How Hybrid Search Works:</h4>
+            <ul>
+              <li><strong>BM25 (0%):</strong> Traditional keyword matching</li>
+              <li>
+                <strong>Balanced (50%):</strong> Mix of keywords + semantics
+              </li>
+              <li>
+                <strong>Vector (100%):</strong> Pure semantic understanding
+              </li>
+            </ul>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Footer -->
+</div>

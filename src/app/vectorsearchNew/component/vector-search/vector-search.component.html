@@ -1,0 +1,146 @@
+<div class="container">
+  <header>
+    <h1>🔍 Vector Semantic Search</h1>
+    <p class="subtitle">Powered by Transformers.js • HNSW Index • LRU Cache</p>
+  </header>
+
+  <!-- Loading Screen -->
+  @if (vectorSearch.isInitializing()) {
+    <div class="loading-screen">
+      <div class="loader"></div>
+      <h2>Initializing Vector Search...</h2>
+      <p>{{ vectorSearch.initProgress() }}%</p>
+      <div class="progress-bar">
+        <div
+          class="progress-fill"
+          [style.width.%]="vectorSearch.initProgress()"
+        ></div>
+      </div>
+      <p class="loading-info">
+        @if (vectorSearch.loadingStage() === "loading-model") {
+          Loading ML model... This may take a moment on first visit.
+        } @else if (vectorSearch.loadingStage() === "generating-embeddings") {
+          Generating document embeddings...
+        } @else {
+          Initialising...
+        }
+      </p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (vectorSearch.error()) {
+    <div class="error-banner">❌ {{ vectorSearch.error() }}</div>
+  }
+
+  <!-- Search Interface -->
+  @if (vectorSearch.isReady()) {
+    <div class="search-section">
+      <!-- Search Input -->
+      <div class="search-input-container">
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search products semantically (e.g., 'portable audio', 'fitness tracking')..."
+          [(ngModel)]="searchQuery"
+        />
+        @if (searchQuery()) {
+          <button class="clear-btn" (click)="clearSearch()">✕</button>
+        }
+      </div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <!-- Similarity Threshold -->
+        <div class="control-group">
+          <label> Similarity Threshold: {{ similarity().toFixed(2) }} </label>
+          <input
+            type="range"
+            min="0.1"
+            max="0.9"
+            step="0.05"
+            [value]="similarity()"
+            (input)="onSimilarityChange($event)"
+            class="slider"
+          />
+          <div class="slider-labels">
+            <span>Looser</span>
+            <span>Stricter</span>
+          </div>
+        </div>
+
+        <!-- Result Limit -->
+        <div class="control-group">
+          <label> Results Limit: {{ limit() }} </label>
+          <input
+            type="range"
+            min="5"
+            max="50"
+            step="5"
+            [value]="limit()"
+            (input)="onLimitChange($event)"
+            class="slider"
+          />
+        </div>
+      </div>
+
+      <!-- Search Results -->
+      @if (searchResults()) {
+        <div class="results-section">
+          <div class="results-header">
+            <h3>
+              Found {{ searchResults()!.count }} results
+              <span class="elapsed"
+                >({{ searchResults()!.elapsed.toFixed(1) }}ms)</span
+              >
+            </h3>
+          </div>
+
+          <div class="results-grid">
+            @for (hit of searchResults()!.hits; track hit.document.id) {
+              <div class="result-card">
+                <div class="card-header">
+                  <h4>{{ hit.document.name }}</h4>
+                  <span class="score">
+                    {{ (hit.score * 100).toFixed(1) }}%
+                  </span>
+                </div>
+                <p class="description">{{ hit.document.description }}</p>
+                <div class="card-footer">
+                  <span class="price">\${{ hit.document.price }}</span>
+                  <span class="category">{{ hit.document["category"] }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Empty State -->
+      @if (searchQuery() && searchResults()?.hits?.length === 0) {
+        <div class="empty-state">
+          <p>
+            No results found. Try a different search term or lower the
+            similarity threshold.
+          </p>
+        </div>
+      }
+
+      <!-- Initial State -->
+      @if (!searchQuery()) {
+        <div class="initial-state">
+          <h3>💡 Try searching for:</h3>
+          <div class="suggestions">
+            <button
+              *ngFor="let suggestion of suggestions"
+              class="suggestion-chip"
+              (click)="searchQuery.set(suggestion)"
+            >
+              {{ suggestion }}
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,15 @@
+@if (isVisible()) {
+  <div class="overlay">
+    <h2>Initializing search…</h2>
+
+    <div class="bar">
+      <div class="fill" [style.width.%]="progress()"></div>
+    </div>
+
+    <p>{{ progress() }}%</p>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+  </div>
+}

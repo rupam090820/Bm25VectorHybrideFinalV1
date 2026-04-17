@@ -1,0 +1,19 @@
+<app-global-loading-overlay />
+
+<nav>
+  <ul>
+    <li>
+      <a [routerLink]="['Home']" routerLinkActive="active">Home</a>
+    </li>
+    <li><a [routerLink]="['BM25']" routerLinkActive="active">BM25</a></li>
+    <li><a [routerLink]="['Vector']" routerLinkActive="active">Vector</a></li>
+    <li><a [routerLink]="['Hybrid']" routerLinkActive="active">Hybride</a></li>
+  </ul>
+</nav>
+
+<!-- Router Outlet -->
+<div class="router-outlet-container">
+  <div id="router-outlet" class="content">
+    <router-outlet></router-outlet>
+  </div>
+</div>

@@ -1,0 +1,72 @@
+/* You can add global styles to this file, and also import other style files */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f5f5;
+}
+
+/* Navigation Bar */
+nav {
+  background-color: #1976d2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+li {
+  margin: 0;
+}
+
+a {
+  display: block;
+  color: white;
+  text-decoration: none;
+  padding: 16px 24px;
+  transition: background-color 0.3s;
+  font-weight: 500;
+}
+
+a:hover {
+  background-color: #1565c0;
+}
+
+a.active {
+  background-color: #0d47a1;
+  border-bottom: 3px solid #fff;
+}
+
+/* Router Outlet Container */
+.router-outlet-container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 20px;
+  background-color: white;
+  min-height: 400px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.content {
+  padding: 20px;
+}
+
+.content h1 {
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.content p {
+  color: #666;
+  line-height: 1.6;
+}

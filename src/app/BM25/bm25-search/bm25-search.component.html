@@ -1,0 +1,61 @@
+<h1>BM25 Full-Text Search state based</h1>
+
+<!-- Initialization state -->
+@if (infra.isInitializing()) {
+  <p>
+    Initializing BM25 database…
+    <strong>{{ infra.progress() }}%</strong>
+  </p>
+}
+
+<!-- Initialization error -->
+@if (infra.error()) {
+  <p class="error">
+    {{ infra.error() }}
+  </p>
+}
+
+<!-- Search UI -->
+@if (!infra.isInitializing() && !infra.error()) {
+  <input
+    placeholder="Search states…"
+    (input)="onInput($any($event.target).value)"
+  />
+
+  <label>
+    Limit:
+    <input
+      type="number"
+      [value]="limit()"
+      (input)="setLimit($any($event.target).value)"
+      min="1"
+    />
+  </label>
+
+  <!-- Results -->
+  @if (results()) {
+    <p>
+      {{ results()?.count }} results — {{ results()?.elapsed.toFixed(1) }} ms
+    </p>
+
+    @if (results()?.hits.length > 0) {
+      <ul>
+        @for (hit of results()?.hits; track hit.id) {
+          <li>
+            <strong>{{ hit.document.state_name }}</strong>
+            ({{ hit.document.state_code }}) — score: {{ hit.score.toFixed(2) }}
+          </li>
+        }
+      </ul>
+    } @else {
+      <p>No results found.</p>
+    }
+  }
+
+  <!-- Search error -->
+  @if (error()) {
+    <p class="error">
+      {{ error() }}
+    </p>
+  }
+}
